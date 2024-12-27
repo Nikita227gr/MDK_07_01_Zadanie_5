@@ -1,0 +1,330 @@
+-- DROP SCHEMA public;
+
+CREATE SCHEMA public AUTHORIZATION pg_database_owner;
+
+COMMENT ON SCHEMA public IS 'standard public schema';
+
+-- DROP SEQUENCE film_id_seq;
+
+CREATE SEQUENCE film_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE film_id_seq OWNER TO postgres;
+GRANT ALL ON SEQUENCE film_id_seq TO postgres;
+
+-- DROP SEQUENCE film_id_seq1;
+
+CREATE SEQUENCE film_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE film_id_seq1 OWNER TO postgres;
+GRANT ALL ON SEQUENCE film_id_seq1 TO postgres;
+
+-- DROP SEQUENCE hall_id_seq;
+
+CREATE SEQUENCE hall_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE hall_id_seq OWNER TO postgres;
+GRANT ALL ON SEQUENCE hall_id_seq TO postgres;
+
+-- DROP SEQUENCE hall_id_seq1;
+
+CREATE SEQUENCE hall_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE hall_id_seq1 OWNER TO postgres;
+GRANT ALL ON SEQUENCE hall_id_seq1 TO postgres;
+
+-- DROP SEQUENCE screening_id_seq;
+
+CREATE SEQUENCE screening_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE screening_id_seq OWNER TO postgres;
+GRANT ALL ON SEQUENCE screening_id_seq TO postgres;
+
+-- DROP SEQUENCE screening_id_seq1;
+
+CREATE SEQUENCE screening_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE screening_id_seq1 OWNER TO postgres;
+GRANT ALL ON SEQUENCE screening_id_seq1 TO postgres;
+
+-- DROP SEQUENCE tickets_id_seq;
+
+CREATE SEQUENCE tickets_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE tickets_id_seq OWNER TO postgres;
+GRANT ALL ON SEQUENCE tickets_id_seq TO postgres;
+
+-- DROP SEQUENCE tickets_id_seq1;
+
+CREATE SEQUENCE tickets_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE tickets_id_seq1 OWNER TO postgres;
+GRANT ALL ON SEQUENCE tickets_id_seq1 TO postgres;
+-- public.film определение
+
+-- Drop table
+
+-- DROP TABLE film;
+
+CREATE TABLE film (
+	id serial4 NOT NULL,
+	name_ varchar NOT NULL,
+	description varchar NULL,
+	CONSTRAINT film_pkey PRIMARY KEY (id)
+);
+
+-- Permissions
+
+ALTER TABLE film OWNER TO postgres;
+GRANT ALL ON TABLE film TO postgres;
+
+
+-- public.hall определение
+
+-- Drop table
+
+-- DROP TABLE hall;
+
+CREATE TABLE hall (
+	id serial4 NOT NULL,
+	name_ varchar NOT NULL,
+	CONSTRAINT hall_pkey PRIMARY KEY (id)
+);
+
+-- Permissions
+
+ALTER TABLE hall OWNER TO postgres;
+GRANT ALL ON TABLE hall TO postgres;
+
+
+-- public.hall_row определение
+
+-- Drop table
+
+-- DROP TABLE hall_row;
+
+CREATE TABLE hall_row (
+	id_hall int4 NULL,
+	number_ int2 NOT NULL,
+	capacity int2 NOT NULL,
+	CONSTRAINT hall_row_pkey PRIMARY KEY (number_),
+	CONSTRAINT hall_row_id_hall_fkey FOREIGN KEY (id_hall) REFERENCES hall(id)
+);
+
+-- Permissions
+
+ALTER TABLE hall_row OWNER TO postgres;
+GRANT ALL ON TABLE hall_row TO postgres;
+
+
+-- public.screening определение
+
+-- Drop table
+
+-- DROP TABLE screening;
+
+CREATE TABLE screening (
+	id serial4 NOT NULL,
+	hall_id int4 NOT NULL,
+	film_id int4 NOT NULL,
+	time_ timestamp NOT NULL,
+	CONSTRAINT screening_pkey PRIMARY KEY (id),
+	CONSTRAINT screening_film_id_fkey FOREIGN KEY (film_id) REFERENCES film(id),
+	CONSTRAINT screening_hall_id_fkey FOREIGN KEY (hall_id) REFERENCES hall(id)
+);
+
+-- Permissions
+
+ALTER TABLE screening OWNER TO postgres;
+GRANT ALL ON TABLE screening TO postgres;
+
+
+-- public.tickets определение
+
+-- Drop table
+
+-- DROP TABLE tickets;
+
+CREATE TABLE tickets (
+	id serial4 NOT NULL,
+	id_screening int4 NULL,
+	"row" int2 NOT NULL,
+	seat int2 NOT NULL,
+	"cost" int4 NOT NULL,
+	CONSTRAINT tickets_pkey PRIMARY KEY (id),
+	CONSTRAINT tickets_id_screening_fkey FOREIGN KEY (id_screening) REFERENCES screening(id)
+);
+
+-- Permissions
+
+ALTER TABLE tickets OWNER TO postgres;
+GRANT ALL ON TABLE tickets TO postgres;
+
+
+-- public.z1 исходный текст
+
+CREATE OR REPLACE VIEW z1
+AS SELECT screening.id,
+    screening.hall_id,
+    film.name_,
+    screening.time_,
+    film.description
+   FROM screening
+     JOIN film ON film.id = screening.film_id
+  WHERE screening.time_ > '2024-01-01 11:00:00'::timestamp without time zone AND screening.time_ < '2024-01-02 00:00:00'::timestamp without time zone;
+
+-- Permissions
+
+ALTER TABLE z1 OWNER TO postgres;
+GRANT ALL ON TABLE z1 TO postgres;
+
+
+-- public.z2 исходный текст
+
+CREATE OR REPLACE VIEW z2
+AS SELECT screening.id,
+    hall.name_,
+    screening.time_
+   FROM screening
+     JOIN hall ON hall.id = screening.hall_id
+  WHERE hall.id = 1;
+
+-- Permissions
+
+ALTER TABLE z2 OWNER TO postgres;
+GRANT ALL ON TABLE z2 TO postgres;
+
+
+-- public.z3 исходный текст
+
+CREATE OR REPLACE VIEW z3
+AS SELECT screening.id,
+    screening.hall_id,
+    film.name_,
+    screening.time_,
+    film.description
+   FROM screening
+     JOIN film ON film.id = screening.film_id
+  WHERE film.name_::text = 'Форсаж 1'::text;
+
+-- Permissions
+
+ALTER TABLE z3 OWNER TO postgres;
+GRANT ALL ON TABLE z3 TO postgres;
+
+
+
+
+-- Permissions
+
+GRANT ALL ON SCHEMA public TO pg_database_owner;
+GRANT USAGE ON SCHEMA public TO public;
+
+INSERT INTO public.film (id,name_,description) VALUES
+	 (1,'Форсаж 1','Боевик, триллер'),
+	 (2,'Форсаж 2','Боевик, триллер'),
+	 (3,'Форсаж 3','Боевик, триллер'),
+	 (4,'Форсаж 4','Боевик, триллер'),
+	 (5,'Форсаж 5','Боевик, триллер'),
+	 (6,'Лунтик','Боевик'),
+	 (7,'Соник','Фэнтези'),
+	 (8,'Соник 2','Фэнтези');
+INSERT INTO public.hall (id,name_) VALUES
+	 (1,'Маленький зал 1'),
+	 (2,'Маленький зал 2'),
+	 (3,'Маленький зал 3'),
+	 (4,'Средний зал 1'),
+	 (5,'Средний зал 2'),
+	 (6,'Средний зал 3'),
+	 (7,'Большой зал 1'),
+	 (8,'Большой зал 2');
+INSERT INTO public.hall_row (id_hall,number_,capacity) VALUES
+	 (1,1,6),
+	 (2,6,12),
+	 (3,2,8),
+	 (4,3,7),
+	 (5,5,12),
+	 (6,4,6),
+	 (7,8,8),
+	 (8,7,7);
+INSERT INTO public.screening (id,hall_id,film_id,time_) VALUES
+	 (1,1,2,'2024-04-01 11:00:00'),
+	 (2,2,1,'2024-04-02 20:00:00'),
+	 (3,3,3,'2024-04-03 11:00:00'),
+	 (4,5,5,'2024-04-04 10:00:00'),
+	 (5,4,4,'2024-04-05 11:00:00'),
+	 (6,6,7,'2024-01-01 11:30:00'),
+	 (7,8,6,'2024-04-06 11:30:00'),
+	 (8,7,8,'2024-01-01 09:00:00');
+INSERT INTO public.tickets (id,id_screening,"row",seat,"cost") VALUES
+	 (1,1,5,12,450),
+	 (2,3,4,9,350),
+	 (3,2,6,8,400),
+	 (4,5,8,4,300),
+	 (5,4,2,10,500),
+	 (6,7,1,5,400),
+	 (7,8,2,7,350),
+	 (8,6,4,2,450);
